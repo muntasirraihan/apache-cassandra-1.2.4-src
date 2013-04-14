@@ -7,7 +7,7 @@
 
 # The name of the cluster. This is mainly used to prevent machines in
 # one logical cluster from joining another.
-cluster_name: 'Test Cluster'
+cluster_name: 'c1.2.4-multi-dc'
 
 # This defines the number of tokens randomly assigned to this node on the ring
 # The more tokens, relative to other nodes, the larger the proportion of data
@@ -21,7 +21,7 @@ cluster_name: 'Test Cluster'
 #
 # If you already have a cluster with 1 token per node, and wish to migrate to 
 # multiple tokens per node, see http://wiki.apache.org/cassandra/Operations
-# num_tokens: 256
+num_tokens: 256
 
 # If you haven't specified num_tokens, or have set it to the default of 1 then
 # you should always specify InitialToken when setting up a production
@@ -224,7 +224,7 @@ seed_provider:
       parameters:
           # seeds is actually a comma-delimited list of addresses.
           # Ex: "<ip1>,<ip2>,<ip3>"
-          - seeds: "127.0.0.1"
+          - seeds: "fs30"
 
 # emergency pressure valve: each time heap usage after a full (CMS)
 # garbage collection is above this fraction of the max, Cassandra will
@@ -315,7 +315,7 @@ ssl_storage_port: 7001
 # address associated with the hostname (it might not be).
 #
 # Setting this to 0.0.0.0 is always wrong.
-listen_address: localhost
+listen_address:
 
 # Address to broadcast to other Cassandra nodes
 # Leaving this blank will set it to the same value as listen_address
@@ -349,7 +349,7 @@ start_rpc: true
 # 
 # Leaving this blank has the same effect it does for ListenAddress,
 # (i.e. it will be based on the configured hostname of the node).
-rpc_address: localhost
+rpc_address:
 # port for Thrift to listen for clients on
 rpc_port: 9160
 
@@ -484,11 +484,11 @@ compaction_preheat_key_cache: true
 # stream_throughput_outbound_megabits_per_sec: 200
 
 # How long the coordinator should wait for read operations to complete
-read_request_timeout_in_ms: 10000
+read_request_timeout_in_ms: 50000
 # How long the coordinator should wait for seq or index scans to complete
-range_request_timeout_in_ms: 10000
+range_request_timeout_in_ms: 50000
 # How long the coordinator should wait for writes to complete
-write_request_timeout_in_ms: 10000
+write_request_timeout_in_ms: 50000
 # How long the coordinator should wait for truncates to complete
 # (This can be much longer, because unless auto_snapshot is disabled
 # we need to flush first so we can snapshot before removing the data.)
@@ -564,7 +564,7 @@ cross_node_timeout: false
 #
 # You can use a custom Snitch by setting this to the full class name
 # of the snitch, which will be assumed to be on your classpath.
-endpoint_snitch: SimpleSnitch
+endpoint_snitch: PropertyFileSnitch
 
 # controls how often to perform the more expensive part of host score
 # calculation
