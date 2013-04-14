@@ -232,6 +232,9 @@ fi
 # comment out this entry to enable IPv6 support).
 JVM_OPTS="$JVM_OPTS -Djava.net.preferIPv4Stack=true"
 
+# For faster repeated testing. Not sure what side effects would be there.
+JVM_OPTS="$JVM_OPTS -Dcassandra.ring_delay_ms=1000"
+
 # jmx: metrics and administration interface
 # 
 # add this if you're having trouble connecting:
