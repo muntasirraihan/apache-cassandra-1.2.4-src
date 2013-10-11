@@ -896,13 +896,14 @@ public class StorageProxy implements StorageProxyMBean
                 
                 // Muntasir: Do a sleep here for t milliseconds, t will be a parameter exposed in cassandra yaml later
                 // 
-                logger.info("***MUNTASIR***: SLEEPING FOR 1ms");
-                try {
-                	Thread.sleep(1000); //sleep for 1 ms
-                }
-                catch(Exception e) {
-                	System.out.println(e);
-                }
+                logger.info("***MUNTASIR***: SLEEPING FOR 3ms");
+                try { Thread.sleep(3L); } catch (InterruptedException e) {}
+                //try {
+                //	Thread.sleep(1000); //sleep for 1 ms
+                //}
+                //catch(Exception e) {
+                //	System.out.println(e);
+                //}
                 
                 if (dataPoint.equals(FBUtilities.getBroadcastAddress()) && OPTIMIZE_LOCAL_REQUESTS)
                 {
