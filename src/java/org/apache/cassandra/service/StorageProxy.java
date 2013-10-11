@@ -879,6 +879,7 @@ public class StorageProxy implements StorageProxyMBean
                 Table table = Table.open(command.getKeyspace());
                 assert !command.isDigestQuery();
                 logger.trace("Command/ConsistencyLevel is {}/{}", command, consistency_level);
+                logger.info("***MUNTASIR*** Command/ConsistencyLevel is {}/{}", command, consistency_level);
 
                 List<InetAddress> endpoints = getLiveSortedEndpoints(table, command.key);
                 CFMetaData cfm = Schema.instance.getCFMetaData(command.getKeyspace(), command.getColumnFamilyName());
@@ -892,6 +893,17 @@ public class StorageProxy implements StorageProxyMBean
 
                 // The data-request message is sent to dataPoint, the node that will actually get the data for us
                 InetAddress dataPoint = endpoints.get(0);
+                
+                // Muntasir: Do a sleep here for t milliseconds, t will be a parameter exposed in cassandra yaml later
+                // 
+                logger.info("***MUNTASIR***: SLEEPING FOR 1ms");
+                try {
+                	Thread.sleep(1000); //sleep for 1 ms
+                }
+                catch(Exception e) {
+                	System.out.println(e);
+                }
+                
                 if (dataPoint.equals(FBUtilities.getBroadcastAddress()) && OPTIMIZE_LOCAL_REQUESTS)
                 {
                     logger.trace("reading data locally");
