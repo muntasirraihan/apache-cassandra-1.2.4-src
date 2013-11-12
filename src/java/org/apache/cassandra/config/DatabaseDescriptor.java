@@ -727,6 +727,10 @@ public class DatabaseDescriptor
     {
         return conf.cluster_name;
     }
+    
+    public static long getReadDelay() {
+    	return conf.read_delay;
+    }
 
     public static int getMaxStreamingRetries()
     {

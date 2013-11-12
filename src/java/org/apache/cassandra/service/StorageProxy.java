@@ -895,9 +895,11 @@ public class StorageProxy implements StorageProxyMBean
                 InetAddress dataPoint = endpoints.get(0);
                 
                 // Muntasir: Do a sleep here for t milliseconds, t will be a parameter exposed in cassandra yaml later
-                // 
-                logger.info("***MUNTASIR***: SLEEPING FOR 3ms");
-                try { Thread.sleep(3L); } catch (InterruptedException e) {}
+                //
+                long delay = DatabaseDescriptor.getReadDelay() * 1000L;
+                logger.info("***MUNTASIR***: SLEEPING FOR " + delay + "ms");
+                
+                try { Thread.sleep(delay); } catch (InterruptedException e) {}
                 //try {
                 //	Thread.sleep(1000); //sleep for 1 ms
                 //}

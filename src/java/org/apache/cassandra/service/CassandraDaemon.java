@@ -126,6 +126,7 @@ public class CassandraDaemon
         String javaVmName = System.getProperty("java.vm.name");
         logger.info("JVM vendor/version: {}/{}", javaVmName, javaVersion);
 	    logger.info("*******************MUNTASIR DESPARATELY TRYING***************");
+	    logger.info("Got read delay from yaml: " + DatabaseDescriptor.getReadDelay());
         if (javaVmName.contains("OpenJDK"))
         {
             // There is essentially no QA done on OpenJDK builds, and
