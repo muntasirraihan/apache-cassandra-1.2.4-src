@@ -896,7 +896,7 @@ public class StorageProxy implements StorageProxyMBean
                 
                 // Muntasir: Do a sleep here for t milliseconds, t will be a parameter exposed in cassandra yaml later
                 //
-                long delay = DatabaseDescriptor.getReadDelay() * 1000L;
+                long delay = DatabaseDescriptor.getReadDelay();
                 logger.info("***MUNTASIR***: SLEEPING FOR " + delay + "ms");
                 
                 try { Thread.sleep(delay); } catch (InterruptedException e) {}
