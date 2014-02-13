@@ -168,7 +168,7 @@ public abstract class ModificationStatement extends CFStatement implements CQLSt
 
         List<Row> rows = local
                        ? SelectStatement.readLocally(keyspace(), commands)
-                       : StorageProxy.read(commands, cl);
+                       : StorageProxy.read(commands, cl, 0);
 
         Map<ByteBuffer, ColumnGroupMap> map = new HashMap<ByteBuffer, ColumnGroupMap>();
         for (Row row : rows)

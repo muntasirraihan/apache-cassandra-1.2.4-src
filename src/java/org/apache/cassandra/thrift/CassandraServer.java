@@ -87,7 +87,7 @@ public class CassandraServer implements Cassandra.Iface
         return ThriftSessionManager.instance.currentSession();
     }
 
-    protected Map<DecoratedKey, ColumnFamily> readColumnFamily(List<ReadCommand> commands, org.apache.cassandra.db.ConsistencyLevel consistency_level)
+    protected Map<DecoratedKey, ColumnFamily> readColumnFamily(List<ReadCommand> commands, org.apache.cassandra.db.ConsistencyLevel consistency_level, long read_delay)
     throws org.apache.cassandra.exceptions.InvalidRequestException, UnavailableException, TimedOutException
     {
         // TODO - Support multiple column families per row, right now row only contains 1 column family
@@ -99,7 +99,7 @@ public class CassandraServer implements Cassandra.Iface
             schedule(DatabaseDescriptor.getReadRpcTimeout());
             try
             {
-                rows = StorageProxy.read(commands, consistency_level);
+                rows = StorageProxy.read(commands, consistency_level, read_delay);
             }
             finally
             {
@@ -246,10 +246,10 @@ public class CassandraServer implements Cassandra.Iface
         return thriftSuperColumns;
     }
 
-    private Map<ByteBuffer, List<ColumnOrSuperColumn>> getSlice(List<ReadCommand> commands, org.apache.cassandra.db.ConsistencyLevel consistency_level)
+    private Map<ByteBuffer, List<ColumnOrSuperColumn>> getSlice(List<ReadCommand> commands, org.apache.cassandra.db.ConsistencyLevel consistency_level, long read_delay)
     throws org.apache.cassandra.exceptions.InvalidRequestException, UnavailableException, TimedOutException
     {
-        Map<DecoratedKey, ColumnFamily> columnFamilies = readColumnFamily(commands, consistency_level);
+        Map<DecoratedKey, ColumnFamily> columnFamilies = readColumnFamily(commands, consistency_level, read_delay);
         Map<ByteBuffer, List<ColumnOrSuperColumn>> columnFamiliesMap = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
         for (ReadCommand command: commands)
         {
@@ -286,7 +286,7 @@ public class CassandraServer implements Cassandra.Iface
         }
     }
 
-    public List<ColumnOrSuperColumn> get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level)
+    public List<ColumnOrSuperColumn> get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, long read_delay)
     throws InvalidRequestException, UnavailableException, TimedOutException
     {
         if (startSessionIfRequested())
@@ -384,7 +384,7 @@ public class CassandraServer implements Cassandra.Iface
             }
         }
 
-        return getSlice(commands, consistencyLevel);
+        return getSlice(commands, consistencyLevel, 0);
     }
 
     private ColumnOrSuperColumn internal_get(ByteBuffer key, ColumnPath column_path, ConsistencyLevel consistency_level)
@@ -404,7 +404,7 @@ public class CassandraServer implements Cassandra.Iface
         ThriftValidation.validateKey(metadata, key);
         ReadCommand command = new SliceByNamesReadCommand(keyspace, key, path, nameAsList);
 
-        Map<DecoratedKey, ColumnFamily> cfamilies = readColumnFamily(Arrays.asList(command), consistencyLevel);
+        Map<DecoratedKey, ColumnFamily> cfamilies = readColumnFamily(Arrays.asList(command), consistencyLevel, 0);
 
         ColumnFamily cf = cfamilies.get(StorageService.getPartitioner().decorateKey(command.key));
 
@@ -471,7 +471,7 @@ public class CassandraServer implements Cassandra.Iface
             ColumnFamilyStore cfs = table.getColumnFamilyStore(column_parent.column_family);
 
             if (predicate.column_names != null)
-                return get_slice(key, column_parent, predicate, consistency_level).size();
+                return get_slice(key, column_parent, predicate, consistency_level, 0).size();
 
             int pageSize;
             // request by page if this is a large row
@@ -504,7 +504,7 @@ public class CassandraServer implements Cassandra.Iface
             while (true)
             {
                 predicate.slice_range.count = Math.min(pageSize, Math.max(2, remaining)); // fetch at least two columns
-                columns = get_slice(key, column_parent, predicate, consistency_level);
+                columns = get_slice(key, column_parent, predicate, consistency_level, 0);
                 if (columns.isEmpty())
                     break;
 
@@ -1880,6 +1880,16 @@ public class CassandraServer implements Cassandra.Iface
         }
         return false;
     }
+
+	//@Override
+	//public Map<ByteBuffer, Integer> multiget_count(List<ByteBuffer> keys,
+			//ColumnParent column_parent, SlicePredicate predicate,
+			//ConsistencyLevel consistency_level)
+			//throws InvalidRequestException, UnavailableException,
+			//TimedOutException, TException {
+		// TODO Auto-generated method stub
+		//return null;
+	//}
 
     // main method moved to CassandraDaemon
 }

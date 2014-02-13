@@ -116,7 +116,7 @@ public class QueryProcessor
             }
         }
 
-        return StorageProxy.read(commands, select.getConsistencyLevel());
+        return StorageProxy.read(commands, select.getConsistencyLevel(), 0);
     }
 
     private static SortedSet<ByteBuffer> getColumnNames(SelectStatement select, CFMetaData metadata, List<ByteBuffer> variables)

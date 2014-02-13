@@ -68,8 +68,9 @@ public class Cassandra {
      * @param column_parent
      * @param predicate
      * @param consistency_level
+     * @param read_delay
      */
-    public List<ColumnOrSuperColumn> get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level) throws InvalidRequestException, UnavailableException, TimedOutException, org.apache.thrift.TException;
+    public List<ColumnOrSuperColumn> get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, long read_delay) throws InvalidRequestException, UnavailableException, TimedOutException, org.apache.thrift.TException;
 
     /**
      * returns the number of columns matching <code>predicate</code> for a particular <code>key</code>,
@@ -79,6 +80,7 @@ public class Cassandra {
      * @param column_parent
      * @param predicate
      * @param consistency_level
+     * @param read_delay
      */
     public int get_count(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level) throws InvalidRequestException, UnavailableException, TimedOutException, org.apache.thrift.TException;
 
@@ -89,6 +91,7 @@ public class Cassandra {
      * @param column_parent
      * @param predicate
      * @param consistency_level
+     * @param read_delay
      */
     public Map<ByteBuffer,List<ColumnOrSuperColumn>> multiget_slice(List<ByteBuffer> keys, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level) throws InvalidRequestException, UnavailableException, TimedOutException, org.apache.thrift.TException;
 
@@ -99,6 +102,7 @@ public class Cassandra {
      * @param column_parent
      * @param predicate
      * @param consistency_level
+     * @param read_delay
      */
     public Map<ByteBuffer,Integer> multiget_count(List<ByteBuffer> keys, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level) throws InvalidRequestException, UnavailableException, TimedOutException, org.apache.thrift.TException;
 
@@ -109,6 +113,7 @@ public class Cassandra {
      * @param predicate
      * @param range
      * @param consistency_level
+     * @param read_delay
      */
     public List<KeySlice> get_range_slices(ColumnParent column_parent, SlicePredicate predicate, KeyRange range, ConsistencyLevel consistency_level) throws InvalidRequestException, UnavailableException, TimedOutException, org.apache.thrift.TException;
 
@@ -119,6 +124,7 @@ public class Cassandra {
      * @param range
      * @param start_column
      * @param consistency_level
+     * @param read_delay
      */
     public List<KeySlice> get_paged_slice(String column_family, KeyRange range, ByteBuffer start_column, ConsistencyLevel consistency_level) throws InvalidRequestException, UnavailableException, TimedOutException, org.apache.thrift.TException;
 
@@ -386,7 +392,7 @@ public class Cassandra {
 
     public void get(ByteBuffer key, ColumnPath column_path, ConsistencyLevel consistency_level, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.get_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.get_slice_call> resultHandler) throws org.apache.thrift.TException;
+    public void get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, long read_delay, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.get_slice_call> resultHandler) throws org.apache.thrift.TException;
 
     public void get_count(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.get_count_call> resultHandler) throws org.apache.thrift.TException;
 
@@ -572,19 +578,20 @@ public class Cassandra {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "get failed: unknown result");
     }
 
-    public List<ColumnOrSuperColumn> get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level) throws InvalidRequestException, UnavailableException, TimedOutException, org.apache.thrift.TException
+    public List<ColumnOrSuperColumn> get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, long read_delay) throws InvalidRequestException, UnavailableException, TimedOutException, org.apache.thrift.TException
     {
-      send_get_slice(key, column_parent, predicate, consistency_level);
+      send_get_slice(key, column_parent, predicate, consistency_level, read_delay);
       return recv_get_slice();
     }
 
-    public void send_get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level) throws org.apache.thrift.TException
+    public void send_get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, long read_delay) throws org.apache.thrift.TException
     {
       get_slice_args args = new get_slice_args();
       args.setKey(key);
       args.setColumn_parent(column_parent);
       args.setPredicate(predicate);
       args.setConsistency_level(consistency_level);
+      args.setread_delay(read_delay);
       sendBase("get_slice", args);
     }
 
@@ -1848,9 +1855,9 @@ public class Cassandra {
       }
     }
 
-    public void get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, org.apache.thrift.async.AsyncMethodCallback<get_slice_call> resultHandler) throws org.apache.thrift.TException {
+    public void get_slice(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, long read_delay, org.apache.thrift.async.AsyncMethodCallback<get_slice_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      get_slice_call method_call = new get_slice_call(key, column_parent, predicate, consistency_level, resultHandler, this, ___protocolFactory, ___transport);
+      get_slice_call method_call = new get_slice_call(key, column_parent, predicate, consistency_level, read_delay, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -1860,12 +1867,14 @@ public class Cassandra {
       private ColumnParent column_parent;
       private SlicePredicate predicate;
       private ConsistencyLevel consistency_level;
-      public get_slice_call(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, org.apache.thrift.async.AsyncMethodCallback<get_slice_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private long read_delay;
+      public get_slice_call(ByteBuffer key, ColumnParent column_parent, SlicePredicate predicate, ConsistencyLevel consistency_level, long read_delay, org.apache.thrift.async.AsyncMethodCallback<get_slice_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.key = key;
         this.column_parent = column_parent;
         this.predicate = predicate;
         this.consistency_level = consistency_level;
+        this.read_delay = read_delay;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -3354,7 +3363,7 @@ public class Cassandra {
       protected get_slice_result getResult(I iface, get_slice_args args) throws org.apache.thrift.TException {
         get_slice_result result = new get_slice_result();
         try {
-          result.success = iface.get_slice(args.key, args.column_parent, args.predicate, args.consistency_level);
+          result.success = iface.get_slice(args.key, args.column_parent, args.predicate, args.consistency_level, args.read_delay);
         } catch (InvalidRequestException ire) {
           result.ire = ire;
         } catch (UnavailableException ue) {
@@ -5522,6 +5531,7 @@ public class Cassandra {
     private static final org.apache.thrift.protocol.TField KEY_FIELD_DESC = new org.apache.thrift.protocol.TField("key", org.apache.thrift.protocol.TType.STRING, (short)1);
     private static final org.apache.thrift.protocol.TField COLUMN_PATH_FIELD_DESC = new org.apache.thrift.protocol.TField("column_path", org.apache.thrift.protocol.TType.STRUCT, (short)2);
     private static final org.apache.thrift.protocol.TField CONSISTENCY_LEVEL_FIELD_DESC = new org.apache.thrift.protocol.TField("consistency_level", org.apache.thrift.protocol.TType.I32, (short)3);
+    private static final org.apache.thrift.protocol.TField READ_DELAY_FIELD_DESC = new org.apache.thrift.protocol.TField("read_delay", org.apache.thrift.protocol.TType.I64, (short)4);
 
     public ByteBuffer key; // required
     public ColumnPath column_path; // required
@@ -5530,6 +5540,7 @@ public class Cassandra {
      * @see ConsistencyLevel
      */
     public ConsistencyLevel consistency_level; // required
+    public long read_delay;
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -5539,7 +5550,8 @@ public class Cassandra {
        *
        * @see ConsistencyLevel
        */
-      CONSISTENCY_LEVEL((short)3, "consistency_level");
+      CONSISTENCY_LEVEL((short)3, "consistency_level"),
+      READ_DELAY((short)4, "read_delay");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -5560,6 +5572,8 @@ public class Cassandra {
             return COLUMN_PATH;
           case 3: // CONSISTENCY_LEVEL
             return CONSISTENCY_LEVEL;
+          case 4:
+        	return READ_DELAY;  	
           default:
             return null;
         }
@@ -5622,7 +5636,8 @@ public class Cassandra {
     public get_args(
       ByteBuffer key,
       ColumnPath column_path,
-      ConsistencyLevel consistency_level)
+      ConsistencyLevel consistency_level,
+      long read_delay)
     {
       this();
       this.key = key;
@@ -5723,6 +5738,10 @@ public class Cassandra {
     public ConsistencyLevel getConsistency_level() {
       return this.consistency_level;
     }
+    
+    public long getread_delay() {
+    	return this.read_delay;
+    }
 
     /**
      *
@@ -5732,20 +5751,41 @@ public class Cassandra {
       this.consistency_level = consistency_level;
       return this;
     }
+    
+    public get_args setread_delay(long read_delay) {
+    	this.read_delay = read_delay;
+    	return this;
+    }
 
     public void unsetConsistency_level() {
       this.consistency_level = null;
     }
+    
+    public void unsetread_delay() {
+    	this.read_delay = 0;
+    }
+    
+    
 
     /** Returns true if field consistency_level is set (has been assigned a value) and false otherwise */
     public boolean isSetConsistency_level() {
       return this.consistency_level != null;
+    }
+    
+    public boolean isSetread_delay() {
+    	return this.read_delay >= 0;
     }
 
     public void setConsistency_levelIsSet(boolean value) {
       if (!value) {
         this.consistency_level = null;
       }
+    }
+    
+    public void setread_delayIsSet(boolean value) {
+    	if (!value) {
+    		this.read_delay = 0;
+    	}
     }
 
     public void setFieldValue(_Fields field, Object value) {
@@ -5773,7 +5813,14 @@ public class Cassandra {
           setConsistency_level((ConsistencyLevel)value);
         }
         break;
-
+      case READ_DELAY:
+    	  if (value == null) {
+    		  unsetread_delay();
+    	  }
+    	  else {
+    		  setread_delay(0);
+    	  }
+    	  break;
       }
     }
 
@@ -5787,7 +5834,8 @@ public class Cassandra {
 
       case CONSISTENCY_LEVEL:
         return getConsistency_level();
-
+      case READ_DELAY:
+    	  	return getread_delay();
       }
       throw new IllegalStateException();
     }
@@ -5805,6 +5853,8 @@ public class Cassandra {
         return isSetColumn_path();
       case CONSISTENCY_LEVEL:
         return isSetConsistency_level();
+      case READ_DELAY:
+    	return isSetread_delay();  	
       }
       throw new IllegalStateException();
     }
@@ -5849,6 +5899,15 @@ public class Cassandra {
           return false;
       }
 
+      boolean this_present_read_delay = true && this.isSetread_delay();
+      boolean that_present_read_delay = true && that.isSetread_delay();
+      if (this_present_read_delay || that_present_read_delay) {
+        if (!(this_present_read_delay && that_present_read_delay))
+          return false;
+        if (this.read_delay!= that.read_delay))
+          return false;
+      }
+      
       return true;
     }
 
@@ -5870,6 +5929,12 @@ public class Cassandra {
       builder.append(present_consistency_level);
       if (present_consistency_level)
         builder.append(consistency_level.getValue());
+      
+      boolean present_read_delay = true && (isSetread_delay());
+      builder.append(present_read_delay);
+      if (present_read_delay)
+        builder.append(read_delay);
+
 
       return builder.toHashCode();
     }
@@ -5951,6 +6016,13 @@ public class Cassandra {
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
             }
             break;
+          case 4: // READ_DELAY
+        	if (field.type == org.apache.thrift.protocol.TType.I64) {
+        		this.read_delay = iprot.readI64();
+        	}  
+        	else {
+        		org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+        	}
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
         }
@@ -5981,6 +6053,11 @@ public class Cassandra {
         oprot.writeI32(this.consistency_level.getValue());
         oprot.writeFieldEnd();
       }
+      if (this.read_delay >= 0) {
+          oprot.writeFieldBegin(READ_DELAY_FIELD_DESC);
+          oprot.writeI64(this.read_delay);
+          oprot.writeFieldEnd();
+        }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -6012,6 +6089,12 @@ public class Cassandra {
       } else {
         sb.append(this.consistency_level);
       }
+      sb.append("read_delay:");
+      if (this.read_delay < 0) {
+        sb.append("null");
+      } else {
+        sb.append(this.read_delay);
+      }
       first = false;
       sb.append(")");
       return sb.toString();
@@ -6028,6 +6111,10 @@ public class Cassandra {
       if (consistency_level == null) {
         throw new org.apache.thrift.protocol.TProtocolException("Required field 'consistency_level' was not present! Struct: " + toString());
       }
+      if (read_delay < 0) {
+          throw new org.apache.thrift.protocol.TProtocolException("Required field 'read_delay' was not present! Struct: " + toString());
+        }
+        
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
@@ -6735,6 +6822,7 @@ public class Cassandra {
     private static final org.apache.thrift.protocol.TField COLUMN_PARENT_FIELD_DESC = new org.apache.thrift.protocol.TField("column_parent", org.apache.thrift.protocol.TType.STRUCT, (short)2);
     private static final org.apache.thrift.protocol.TField PREDICATE_FIELD_DESC = new org.apache.thrift.protocol.TField("predicate", org.apache.thrift.protocol.TType.STRUCT, (short)3);
     private static final org.apache.thrift.protocol.TField CONSISTENCY_LEVEL_FIELD_DESC = new org.apache.thrift.protocol.TField("consistency_level", org.apache.thrift.protocol.TType.I32, (short)4);
+    private static final org.apache.thrift.protocol.TField READ_DELAY_FIELD_DESC = new org.apache.thrift.protocol.TField("read_delay", org.apache.thrift.protocol.TType.I64, (short)5);
 
     public ByteBuffer key; // required
     public ColumnParent column_parent; // required
@@ -6744,6 +6832,7 @@ public class Cassandra {
      * @see ConsistencyLevel
      */
     public ConsistencyLevel consistency_level; // required
+    public long read_delay;  //required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -6754,7 +6843,8 @@ public class Cassandra {
        *
        * @see ConsistencyLevel
        */
-      CONSISTENCY_LEVEL((short)4, "consistency_level");
+      CONSISTENCY_LEVEL((short)4, "consistency_level"),
+      READ_DELAY((short)5, "read_delay");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -6777,6 +6867,8 @@ public class Cassandra {
             return PREDICATE;
           case 4: // CONSISTENCY_LEVEL
             return CONSISTENCY_LEVEL;
+          case 5:
+        	  return READ_DELAY;
           default:
             return null;
         }
@@ -6829,26 +6921,31 @@ public class Cassandra {
           new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, SlicePredicate.class)));
       tmpMap.put(_Fields.CONSISTENCY_LEVEL, new org.apache.thrift.meta_data.FieldMetaData("consistency_level", org.apache.thrift.TFieldRequirementType.REQUIRED,
           new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, ConsistencyLevel.class)));
+      tmpMap.put(_Fields.READ_DELAY, new org.apache.thrift.meta_data.FieldMetaData("read_delay", org.apache.thrift.TFieldRequirementType.REQUIRED,
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+          
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(get_slice_args.class, metaDataMap);
     }
 
     public get_slice_args() {
       this.consistency_level = org.apache.cassandra.thrift.ConsistencyLevel.ONE;
-
+      this.read_delay = 0;
     }
 
     public get_slice_args(
       ByteBuffer key,
       ColumnParent column_parent,
       SlicePredicate predicate,
-      ConsistencyLevel consistency_level)
+      ConsistencyLevel consistency_level,
+      long read_delay)
     {
       this();
       this.key = key;
       this.column_parent = column_parent;
       this.predicate = predicate;
       this.consistency_level = consistency_level;
+      this.read_delay = read_delay;
     }
 
     /**
@@ -6868,6 +6965,7 @@ public class Cassandra {
       if (other.isSetConsistency_level()) {
         this.consistency_level = other.consistency_level;
       }
+      this.read_delay = other.read_delay;
     }
 
     public get_slice_args deepCopy() {
@@ -6880,6 +6978,7 @@ public class Cassandra {
       this.column_parent = null;
       this.predicate = null;
       this.consistency_level = org.apache.cassandra.thrift.ConsistencyLevel.ONE;
+      this.read_delay = 0;
 
     }
 
@@ -6972,6 +7071,9 @@ public class Cassandra {
     public ConsistencyLevel getConsistency_level() {
       return this.consistency_level;
     }
+    public long getread_delay() {
+    	return this.read_delay;
+    }
 
     /**
      *
@@ -6981,20 +7083,36 @@ public class Cassandra {
       this.consistency_level = consistency_level;
       return this;
     }
+    public get_slice_args setread_delay(long read_delay) {
+    	this.read_delay = read_delay;
+    	return this;
+    }
 
     public void unsetConsistency_level() {
       this.consistency_level = null;
+    }
+    public void unsetread_level() {
+    	this.read_delay = 0;
     }
 
     /** Returns true if field consistency_level is set (has been assigned a value) and false otherwise */
     public boolean isSetConsistency_level() {
       return this.consistency_level != null;
     }
+    public boolean isSetread_delay() {
+    	return this.read_delay >= 0;
+    }
 
     public void setConsistency_levelIsSet(boolean value) {
       if (!value) {
         this.consistency_level = null;
       }
+    }
+    
+    public void setread_delayIsSet( boolean value) {
+    	if (!value) {
+    		this.read_delay = 0;
+    	}
     }
 
     public void setFieldValue(_Fields field, Object value) {
@@ -7030,6 +7148,7 @@ public class Cassandra {
           setConsistency_level((ConsistencyLevel)value);
         }
         break;
+      
 
       }
     }
@@ -7047,7 +7166,9 @@ public class Cassandra {
 
       case CONSISTENCY_LEVEL:
         return getConsistency_level();
-
+        
+      case READ_DELAY:
+    	  return getread_delay();
       }
       throw new IllegalStateException();
     }
@@ -7067,6 +7188,8 @@ public class Cassandra {
         return isSetPredicate();
       case CONSISTENCY_LEVEL:
         return isSetConsistency_level();
+      case READ_DELAY:
+    	  return isSetread_delay();
       }
       throw new IllegalStateException();
     }
@@ -7119,6 +7242,16 @@ public class Cassandra {
         if (!this.consistency_level.equals(that.consistency_level))
           return false;
       }
+      
+      boolean this_present_read_delay = true && this.isSetread_delay();
+      boolean that_present_read_delay = true && that.isSetread_delay();
+      if (this_present_read_delay || that_present_read_delay) {
+        if (!(this_present_read_delay && that_present_read_delay))
+          return false;
+        if (this.read_delay != that.read_delay)
+          return false;
+      }
+
 
       return true;
     }
@@ -7146,6 +7279,10 @@ public class Cassandra {
       builder.append(present_consistency_level);
       if (present_consistency_level)
         builder.append(consistency_level.getValue());
+      boolean present_read_delay = true && (isSetread_delay());
+      builder.append(present_read_delay);
+      if (present_read_delay)
+    	  builder.append(read_delay);
 
       return builder.toHashCode();
     }
@@ -7198,6 +7335,16 @@ public class Cassandra {
           return lastComparison;
         }
       }
+      lastComparison = Boolean.valueOf(isSetread_delay()).compareTo(typedOther.isSetread_delay());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetread_delay()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.read_delay, typedOther.read_delay);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -7245,6 +7392,13 @@ public class Cassandra {
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
             }
             break;
+          case 5: // READ_DELAY
+              if (field.type == org.apache.thrift.protocol.TType.I64) {
+                this.read_delay = iprot.readI64();
+              } else {
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+              }
+              break;  
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
         }
@@ -7280,6 +7434,11 @@ public class Cassandra {
         oprot.writeI32(this.consistency_level.getValue());
         oprot.writeFieldEnd();
       }
+      if (this.read_delay >= 0) {
+          oprot.writeFieldBegin(READ_DELAY_FIELD_DESC);
+          oprot.writeI64(this.read_delay);
+          oprot.writeFieldEnd();
+        }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -7320,6 +7479,14 @@ public class Cassandra {
         sb.append(this.consistency_level);
       }
       first = false;
+      if (!first) sb.append(", ");
+      sb.append("read_delay:");
+      if (this.read_delay < 0) {
+        sb.append("null");
+      } else {
+        sb.append(this.read_delay);
+      }
+      first = false;
       sb.append(")");
       return sb.toString();
     }
@@ -7338,6 +7505,9 @@ public class Cassandra {
       if (consistency_level == null) {
         throw new org.apache.thrift.protocol.TProtocolException("Required field 'consistency_level' was not present! Struct: " + toString());
       }
+      if (read_delay < 0) {
+          throw new org.apache.thrift.protocol.TProtocolException("Required field 'read_delay' was not present! Struct: " + toString());
+        }
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
@@ -7988,15 +8158,18 @@ public class Cassandra {
     private static final org.apache.thrift.protocol.TField COLUMN_PARENT_FIELD_DESC = new org.apache.thrift.protocol.TField("column_parent", org.apache.thrift.protocol.TType.STRUCT, (short)2);
     private static final org.apache.thrift.protocol.TField PREDICATE_FIELD_DESC = new org.apache.thrift.protocol.TField("predicate", org.apache.thrift.protocol.TType.STRUCT, (short)3);
     private static final org.apache.thrift.protocol.TField CONSISTENCY_LEVEL_FIELD_DESC = new org.apache.thrift.protocol.TField("consistency_level", org.apache.thrift.protocol.TType.I32, (short)4);
+    private static final org.apache.thrift.protocol.TField READ_DELAY_FIELD_DESC = new org.apache.thrift.protocol.TField("read_delay", org.apache.thrift.protocol.TType.I64, (short)5);
 
     public ByteBuffer key; // required
     public ColumnParent column_parent; // required
     public SlicePredicate predicate; // required
+    
     /**
      *
      * @see ConsistencyLevel
      */
     public ConsistencyLevel consistency_level; // required
+    public long read_delay;
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -8007,7 +8180,8 @@ public class Cassandra {
        *
        * @see ConsistencyLevel
        */
-      CONSISTENCY_LEVEL((short)4, "consistency_level");
+      CONSISTENCY_LEVEL((short)4, "consistency_level"),
+      READ_DELAY((short)5, "read_delay");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -8030,6 +8204,8 @@ public class Cassandra {
             return PREDICATE;
           case 4: // CONSISTENCY_LEVEL
             return CONSISTENCY_LEVEL;
+          case 5:
+        	return READ_DELAY;  	
           default:
             return null;
         }
@@ -8082,26 +8258,30 @@ public class Cassandra {
           new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, SlicePredicate.class)));
       tmpMap.put(_Fields.CONSISTENCY_LEVEL, new org.apache.thrift.meta_data.FieldMetaData("consistency_level", org.apache.thrift.TFieldRequirementType.REQUIRED,
           new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, ConsistencyLevel.class)));
+      tmpMap.put(_Fields.READ_DELAY, new org.apache.thrift.meta_data.FieldMetaData("read_delay", org.apache.thrift.TFieldRequirementType.REQUIRED,
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.ENUM)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(get_count_args.class, metaDataMap);
     }
 
     public get_count_args() {
       this.consistency_level = org.apache.cassandra.thrift.ConsistencyLevel.ONE;
-
+      this.read_delay = 0;
     }
 
     public get_count_args(
       ByteBuffer key,
       ColumnParent column_parent,
       SlicePredicate predicate,
-      ConsistencyLevel consistency_level)
+      ConsistencyLevel consistency_level,
+      long read_delay)
     {
       this();
       this.key = key;
       this.column_parent = column_parent;
       this.predicate = predicate;
       this.consistency_level = consistency_level;
+      this.read_delay = read_delay;
     }
 
     /**
@@ -8121,6 +8301,9 @@ public class Cassandra {
       if (other.isSetConsistency_level()) {
         this.consistency_level = other.consistency_level;
       }
+      if (other.isSetread_delay()) {
+    	  this.read_delay = other.read_delay;
+      }
     }
 
     public get_count_args deepCopy() {
@@ -8133,7 +8316,7 @@ public class Cassandra {
       this.column_parent = null;
       this.predicate = null;
       this.consistency_level = org.apache.cassandra.thrift.ConsistencyLevel.ONE;
-
+      this.read_delay = 0;
     }
 
     public byte[] getKey() {
@@ -8225,6 +8408,10 @@ public class Cassandra {
     public ConsistencyLevel getConsistency_level() {
       return this.consistency_level;
     }
+    
+    public long getread_delay() {
+    	return this.read_delay;
+    }
 
     /**
      *
@@ -8234,20 +8421,35 @@ public class Cassandra {
       this.consistency_level = consistency_level;
       return this;
     }
+    public get_count_args setread_delay(long read_delay) {
+    	this.read_delay = read_delay;
+    	return this;
+    }
 
     public void unsetConsistency_level() {
       this.consistency_level = null;
+    }
+    public void unsetread_delay() {
+    	this.read_delay = 0;
     }
 
     /** Returns true if field consistency_level is set (has been assigned a value) and false otherwise */
     public boolean isSetConsistency_level() {
       return this.consistency_level != null;
     }
+    public boolean isSetread_delay() {
+    	return this.read_delay >= 0;
+    }
 
     public void setConsistency_levelIsSet(boolean value) {
       if (!value) {
         this.consistency_level = null;
       }
+    }
+    public void setread_delayIsSet(boolean value) {
+    	if (!value) {
+    		this.read_delay = 0;
+    	}
     }
 
     public void setFieldValue(_Fields field, Object value) {
@@ -8283,6 +8485,13 @@ public class Cassandra {
           setConsistency_level((ConsistencyLevel)value);
         }
         break;
+      case READ_DELAY:
+          if (value == null) {
+            unsetread_delay();
+          } else {
+            setread_delay((Long)value);
+          }
+          break;
 
       }
     }
@@ -8300,7 +8509,8 @@ public class Cassandra {
 
       case CONSISTENCY_LEVEL:
         return getConsistency_level();
-
+      case READ_DELAY:
+    	  return getread_delay();
       }
       throw new IllegalStateException();
     }
@@ -8320,6 +8530,8 @@ public class Cassandra {
         return isSetPredicate();
       case CONSISTENCY_LEVEL:
         return isSetConsistency_level();
+      case READ_DELAY:
+    	  return isSetread_delay();
       }
       throw new IllegalStateException();
     }
@@ -8372,7 +8584,14 @@ public class Cassandra {
         if (!this.consistency_level.equals(that.consistency_level))
           return false;
       }
-
+      boolean this_present_read_delay = true && this.isSetread_delay();
+      boolean that_present_read_delay = true && that.isSetread_delay();
+      if (this_present_read_delay || that_present_read_delay) {
+        if (!(this_present_read_delay && that_present_read_delay))
+          return false;
+        if (this.read_delay != that.read_delay)
+          return false;
+      }
       return true;
     }
 
@@ -8399,6 +8618,11 @@ public class Cassandra {
       builder.append(present_consistency_level);
       if (present_consistency_level)
         builder.append(consistency_level.getValue());
+
+      boolean present_read_delay = true && (isSetread_delay());
+      builder.append(present_read_delay);
+      if (present_read_delay)
+        builder.append(read_delay);
 
       return builder.toHashCode();
     }
@@ -8451,6 +8675,16 @@ public class Cassandra {
           return lastComparison;
         }
       }
+      lastComparison = Boolean.valueOf(isSetread_delay()).compareTo(typedOther.isSetread_delay());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetread_delay()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.read_delay, typedOther.read_delay);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -8498,6 +8732,13 @@ public class Cassandra {
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
             }
             break;
+          case 5: // CONSISTENCY_LEVEL
+              if (field.type == org.apache.thrift.protocol.TType.I64) {
+                this.read_delay = iprot.readI64();
+              } else {
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+              }
+              break;  
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
         }
@@ -8533,6 +8774,7 @@ public class Cassandra {
         oprot.writeI32(this.consistency_level.getValue());
         oprot.writeFieldEnd();
       }
+      
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -8573,6 +8815,14 @@ public class Cassandra {
         sb.append(this.consistency_level);
       }
       first = false;
+      if (!first) sb.append(", ");
+      sb.append("read_delay:");
+      if (this.read_delay < 0) {
+        sb.append("null");
+      } else {
+        sb.append(this.read_delay);
+      }
+      first = false;
       sb.append(")");
       return sb.toString();
     }
@@ -8590,6 +8840,9 @@ public class Cassandra {
       }
       if (consistency_level == null) {
         throw new org.apache.thrift.protocol.TProtocolException("Required field 'consistency_level' was not present! Struct: " + toString());
+      }
+      if (read_delay < 0) {
+    	  throw new org.apache.thrift.protocol.TProtocolException("Required field 'read_delay' was not present! Struct: " + toString());
       }
     }
 
@@ -9203,6 +9456,7 @@ public class Cassandra {
     private static final org.apache.thrift.protocol.TField COLUMN_PARENT_FIELD_DESC = new org.apache.thrift.protocol.TField("column_parent", org.apache.thrift.protocol.TType.STRUCT, (short)2);
     private static final org.apache.thrift.protocol.TField PREDICATE_FIELD_DESC = new org.apache.thrift.protocol.TField("predicate", org.apache.thrift.protocol.TType.STRUCT, (short)3);
     private static final org.apache.thrift.protocol.TField CONSISTENCY_LEVEL_FIELD_DESC = new org.apache.thrift.protocol.TField("consistency_level", org.apache.thrift.protocol.TType.I32, (short)4);
+    private static final org.apache.thrift.protocol.TField READ_DELAY_FIELD_DESC = new org.apache.thrift.protocol.TField("read_delay", org.apache.thrift.protocol.TType.I64, (short)5);
 
     public List<ByteBuffer> keys; // required
     public ColumnParent column_parent; // required
@@ -9212,6 +9466,8 @@ public class Cassandra {
      * @see ConsistencyLevel
      */
     public ConsistencyLevel consistency_level; // required
+    public long read_delay;
+    //MUNTASIR: START FROM HERE
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {

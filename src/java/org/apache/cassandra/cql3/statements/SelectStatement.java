@@ -123,7 +123,7 @@ public class SelectStatement implements CQLStatement
 
         List<Row> rows = isKeyRange
                        ? StorageProxy.getRangeSlice(getRangeCommand(variables), cl)
-                       : StorageProxy.read(getSliceCommands(variables), cl);
+                       : StorageProxy.read(getSliceCommands(variables), cl, 0);
 
         return processResults(rows, variables);
     }

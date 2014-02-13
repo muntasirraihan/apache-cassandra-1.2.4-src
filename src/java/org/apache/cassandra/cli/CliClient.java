@@ -779,7 +779,7 @@ public class CliClient
         CounterColumn column;
         try
         {
-            column = thriftClient.get(key, path, consistencyLevel).counter_column;
+            column = thriftClient.get(key, path, consistencyLevel, 0).counter_column;
         }
         catch (NotFoundException e)
         {

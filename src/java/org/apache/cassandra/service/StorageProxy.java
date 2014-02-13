@@ -813,7 +813,7 @@ public class StorageProxy implements StorageProxyMBean
      * Performs the actual reading of a row out of the StorageService, fetching
      * a specific set of column names from a given column family.
      */
-    public static List<Row> read(List<ReadCommand> commands, ConsistencyLevel consistency_level)
+    public static List<Row> read(List<ReadCommand> commands, ConsistencyLevel consistency_level, long read_delay)
     throws UnavailableException, IsBootstrappingException, ReadTimeoutException
     {
         if (StorageService.instance.isBootstrapMode() && !systemTableQuery(commands))
@@ -826,7 +826,7 @@ public class StorageProxy implements StorageProxyMBean
         List<Row> rows = null;
         try
         {
-            rows = fetchRows(commands, consistency_level);
+            rows = fetchRows(commands, consistency_level, read_delay);
         }
         catch (UnavailableException e)
         {
@@ -858,7 +858,7 @@ public class StorageProxy implements StorageProxyMBean
      * 4. If the digests (if any) match the data return the data
      * 5. else carry out read repair by getting data from all the nodes.
      */
-    private static List<Row> fetchRows(List<ReadCommand> initialCommands, ConsistencyLevel consistency_level)
+    private static List<Row> fetchRows(List<ReadCommand> initialCommands, ConsistencyLevel consistency_level, long read_delay)
     throws UnavailableException, ReadTimeoutException
     {
         List<Row> rows = new ArrayList<Row>(initialCommands.size());
@@ -875,6 +875,7 @@ public class StorageProxy implements StorageProxyMBean
             // send out read requests
             for (int i = 0; i < commands.size(); i++)
             {
+            	
                 ReadCommand command = commands.get(i);
                 Table table = Table.open(command.getKeyspace());
                 assert !command.isDigestQuery();
@@ -896,10 +897,10 @@ public class StorageProxy implements StorageProxyMBean
                 
                 // Muntasir: Do a sleep here for t milliseconds, t will be a parameter exposed in cassandra yaml later
                 //
-                long delay = DatabaseDescriptor.getReadDelay();
-                logger.info("***MUNTASIR***: SLEEPING FOR " + delay + "ms");
+                //long delay = DatabaseDescriptor.getReadDelay();
+                logger.info("***MUNTASIR***: SLEEPING FOR " + read_delay + "ms");
                 
-                try { Thread.sleep(delay); } catch (InterruptedException e) {}
+                try { Thread.sleep(read_delay); } catch (InterruptedException e) {}
                 //try {
                 //	Thread.sleep(1000); //sleep for 1 ms
                 //}
